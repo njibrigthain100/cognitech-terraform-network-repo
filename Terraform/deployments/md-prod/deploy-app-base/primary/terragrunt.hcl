@@ -101,5 +101,5 @@ generate "aws-providers" {
 # Source  
 #-------------------------------------------------------
 terraform {
-  source = "../../../..//Formation/Create-vpc"
+  source = "../../../..//formations/CInitiate-account"
 }
