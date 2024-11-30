@@ -19,6 +19,7 @@ locals {
   region_context   = "primary"
   deploy_globally  = "true"
   region           = local.region_context == "primary" ? include.cloud.locals.region.primary : include.cloud.locals.region.secondary
+  region_prefix    = local.region_context == "primary" ? include.cloud.locals.region_prefix.primary : include.cloud.locals.region_prefix.secondary
   deployment_name  = "terraform-${include.env.locals.name_abr}-deploy-app-base-${local.region_context}"
   cidr_blocks      = local.region_context == "primary" ? include.cloud.locals.cidr_block_use1 : include.cloud.locals.cidr_block_usw2
   state_bucket     = local.region_context == "primary" ? include.env.locals.remote_state_bucket.primary : include.env.locals.remote_state_bucket.secondary
