@@ -101,5 +101,5 @@ generate "aws-providers" {
 # Source  
 #-------------------------------------------------------
 terraform {
-  source = "../../../..//formations/CInitiate-account"
+  source = "../../../..//formations/Initiate-account"
 }
