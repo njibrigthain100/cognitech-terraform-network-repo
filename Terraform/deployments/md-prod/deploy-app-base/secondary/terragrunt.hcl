@@ -42,7 +42,7 @@ inputs = {
   common = {
     global        = local.deploy_globally
     account_name  = include.cloud.locals.account_name.Kah.name
-    region_prefix = include.cloud.locals.region_prefix.primary
+    region_prefix = local.region_prefix
     tags          = local.tags
   }
 
