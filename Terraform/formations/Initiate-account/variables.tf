@@ -17,3 +17,21 @@ variable "vpc" {
   })
   default = null
 }
+
+variable "subnets" {
+  description = "The private subnet variables"
+  type = list(object({
+    private_subnet_name       = string
+    private_subnet_cidr_block = list(string)
+    az                        = list(string)
+    public_subnet_name        = string
+    public_subnet_cidr_block  = list(string)
+  }))
+  default = null
+}
+
+variable "vpc_id" {
+  description = "The vpc id"
+  type        = string
+}
+
