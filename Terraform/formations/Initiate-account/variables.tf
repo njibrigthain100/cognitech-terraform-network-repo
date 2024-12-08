@@ -21,17 +21,36 @@ variable "vpc" {
 variable "subnets" {
   description = "The private subnet variables"
   type = list(object({
-    private_subnet_name       = string
-    private_subnet_cidr_block = list(string)
-    az                        = list(string)
-    public_subnet_name        = string
-    public_subnet_cidr_block  = list(string)
+    subnet_name             = string
+    subnet_cidr_block       = list(string)
+    az                      = list(string)
+    map_public_ip_on_launch = bool
   }))
   default = null
 }
 
-variable "vpc_id" {
-  description = "The vpc id"
-  type        = string
+variable "private_subnets" {
+  description = "The private subnet variables"
+  type = list(object({
+    private_subnet_name       = string
+    private_subnet_cidr_block = list(string)
+    az                        = list(string)
+  }))
+  default = null
 }
+
+variable "public_subnets" {
+  description = "The public subnet variables"
+  type = list(object({
+    public_subnet_name       = string
+    public_subnet_cidr_block = list(string)
+    az                       = list(string)
+  }))
+  default = null
+}
+
+# variable "vpc_id" {
+#   description = "The vpc id"
+#   type        = string
+# }
 

@@ -15,6 +15,7 @@ locals {
     secondary = "terragruntusw2"
   }
 
+
   subnet = {
     private = {
       primary   = "use1-priv"

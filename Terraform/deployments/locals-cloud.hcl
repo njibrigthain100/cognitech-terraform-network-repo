@@ -42,7 +42,7 @@ locals {
   }
 
   availability_zones = {
-    primary   = ["us-east-1a", "us-east-1b", "us-east-1c"]
-    secondary = ["us-west-2a", "us-west-2b", "us-west-2c"]
+    primary   = ["us-east-1a", "us-east-1b"]
+    secondary = ["us-west-2a", "us-west-2b"]
   }
 }

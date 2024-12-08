@@ -12,7 +12,7 @@ output "igw_id" {
 output "private_subnets" {
   description = "The private subnet outputs"
   value = var.subnets != null ? {
-    for key, item in module.subnets :
+    for key, item in module.private_subnets :
     key => {
       private_subnet_ids                = item.private_subnet_ids
       private_subnet_cidr_blocks        = item.private_subnet_cidr_blocks
@@ -25,12 +25,12 @@ output "private_subnets" {
 output "public_subnets" {
   description = "The private subnet outputs"
   value = var.subnets != null ? {
-    for key, item in module.subnets :
+    for key, item in module.public_subnets :
     key => {
-      public_subnet_ids                = item.public_subnet_ids
-      public_subnet_cidr_blocks        = item.public_subnet_cidr_blocks
-      public_subnet_arns               = item.public_subnet_arns
-      public_subnet_availability_zones = item.public_subnet_availability_zones
+      public_subnet_ids                = item.subnet_ids
+      public_subnet_cidr_blocks        = item.subnet_cidr_blocks
+      public_subnet_arns               = item.subnet_arns
+      public_subnet_availability_zones = item.subnet_availability_zones
     }
   } : null
 }

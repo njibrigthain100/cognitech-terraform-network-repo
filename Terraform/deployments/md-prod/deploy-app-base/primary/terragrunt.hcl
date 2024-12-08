@@ -52,13 +52,21 @@ inputs = {
     name       = include.env.locals.environment
     cidr_block = local.cidr_blocks[include.env.locals.name_abr].segments.sit.vpc
   }
-  subnets = {
-    private_subnet_name       = include.env.locals.subnet[local.internal][local.region_context]
-    private_subnet_cidr_block = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.internal][local.region_context]
-    az                        = include.cloud.locals.availability_zones[local.region_context]
-    public_subnet_name        = include.env.locals.subnet[local.external][local.region_context]
-    public_subnet_cidr_block  = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.external][local.region_context]
-  }
+  private_subnets = [
+    {
+      private_subnet_name       = include.env.locals.subnet[local.internal][local.region_context]
+      private_subnet_cidr_block = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.internal][local.region_context]
+      az                        = include.cloud.locals.availability_zones[local.region_context]
+    }
+  ]
+
+  public_subnets = [
+    {
+      public_subnet_name       = include.env.locals.subnet[local.external][local.region_context]
+      public_subnet_cidr_block = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.external][local.region_context]
+      az                       = include.cloud.locals.availability_zones[local.region_context]
+    }
+  ]
 }
 
 
