@@ -18,6 +18,8 @@ include "env" {
 locals {
   region_context   = "primary"
   deploy_globally  = "true"
+  internal_subnet = "private"
+  externale_subnet = "public"
   region           = local.region_context == "primary" ? include.cloud.locals.region.primary : include.cloud.locals.region.secondary
   region_prefix    = local.region_context == "primary" ? include.cloud.locals.region_prefix.primary : include.cloud.locals.region_prefix.secondary
   deployment_name  = "terraform-${include.env.locals.name_abr}-deploy-app-base-${local.region_context}"
@@ -49,6 +51,10 @@ inputs = {
   vpc = {
     name       = include.env.locals.environment
     cidr_block = local.cidr_blocks[include.env.locals.name_abr].segments.sit.vpc
+  }
+  subnets = {
+    private_subnet_name = include.env.locals.subnet.private[local.region_context]
+    private_subnet_cidr_block = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.region_context].
   }
 }
 

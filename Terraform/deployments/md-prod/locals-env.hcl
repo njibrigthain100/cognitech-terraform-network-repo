@@ -11,8 +11,19 @@ locals {
   owner       = "kbrigthain@gmail.com"
 
   remote_state_bucket = {
-    primary = "terragruntuse1"
+    primary   = "terragruntuse1"
     secondary = "terragruntusw2"
+  }
+
+  subnet = {
+    private = {
+      primary   = "use1-priv"
+      secondary = "usw2-priv"
+    }
+    public = {
+      primary   = "use1-pub"
+      secondary = "usw2-pub"
+    }
   }
 
   remote_dynamodb_table = "Terraform"
