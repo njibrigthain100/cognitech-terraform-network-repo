@@ -67,6 +67,19 @@ inputs = {
       az                       = include.cloud.locals.availability_zones[local.region_context]
     }
   ]
+
+  eip = [
+    {
+      name = include.cloud.locals.elastic_ips[local.region_context]
+    }
+  ]
+
+
+  ngw = [
+    {
+      name = include.cloud.locals.nat_gateway[local.region_context]
+    }
+  ]
 }
 
 

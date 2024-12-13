@@ -37,5 +37,27 @@ variable "public_subnets" {
   default = null
 }
 
+variable "eip" {
+  description = "The public subnet to e associated to the elastic ip"
+  type = list(object({
+    name = list(string)
+  }))
+  default = null
+}
+variable "ngw" {
+  description = "The nat gateway to be associated to the private subnet"
+  type = list(object({
+    name = list(string)
+    # subnet_id     = string
+    # allocation_id = string
+  }))
+  default = null
+}
+
+
+
+
+
+
 
 

@@ -45,4 +45,14 @@ locals {
     primary   = ["us-east-1a", "us-east-1b"]
     secondary = ["us-west-2a", "us-west-2b"]
   }
+
+  elastic_ips = {
+    primary   = ["peipa", "peipb"]
+    secondary = ["seipa", "seipb"]
+  }
+
+  nat_gateway = {
+    primary   = ["pnata", "pnatb"]
+    secondary = ["snata", "snatb"]
+  }
 }
