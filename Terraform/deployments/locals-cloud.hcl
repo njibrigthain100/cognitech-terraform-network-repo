@@ -36,23 +36,35 @@ locals {
     primary   = "use1"
     secondary = "usw2"
   }
-  region = {
-    primary   = "us-east-1"
-    secondary = "us-west-2"
-  }
+  regions = {
+    use1 = {
+      availability_zones = {
+        primary   = "us-east-1a"
+        secondary = "us-east-1b"
+        tertiary  = "us-east-1c"
+      }
+      name     = "us-east-1"
+      name_abr = "use1"
+    }
 
-  availability_zones = {
-    primary   = ["us-east-1a", "us-east-1b"]
-    secondary = ["us-west-2a", "us-west-2b"]
-  }
+    usw2 = {
+      availability_zones = {
+        primary   = "us-west-2a"
+        secondary = "us-west-2b"
+        tertiary  = "us-west-2c"
+      }
+      name     = "us-west-2"
+      name_abr = "usw2"
+    }
 
-  elastic_ips = {
-    primary   = ["peipa", "peipb"]
-    secondary = ["seipa", "seipb"]
-  }
+    elastic_ips = {
+      primary   = ["peipa", "peipb"]
+      secondary = ["seipa", "seipb"]
+    }
 
-  nat_gateway = {
-    primary   = ["pnata", "pnatb"]
-    secondary = ["snata", "snatb"]
+    nat_gateway = {
+      primary   = ["pnata", "pnatb"]
+      secondary = ["snata", "snatb"]
+    }
   }
 }

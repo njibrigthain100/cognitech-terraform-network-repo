@@ -18,12 +18,12 @@ locals {
 
   subnet = {
     private = {
-      primary   = "ppriv"
-      secondary = "spriv"
+      primary   = "priv"
+      secondary = "priv"
     }
     public = {
-      primary   = "ppub"
-      secondary = "spub"
+      primary   = "pub"
+      secondary = "pub"
     }
   }
 

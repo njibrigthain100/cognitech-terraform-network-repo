@@ -5,55 +5,46 @@ variable "common" {
     tags          = map(string)
     account_name  = string
     region_prefix = string
+    region        = string
   })
   default = null
 }
-
 variable "vpc" {
-  description = "The vpc to be created"
-  type = object({
+  description = "All VPC resources to be created"
+  type = list(object({
     name       = string
     cidr_block = string
-  })
-  default = null
-}
-variable "private_subnets" {
-  description = "The private subnet variables"
-  type = list(object({
-    private_subnet_name       = string
-    private_subnet_cidr_block = list(string)
-    az                        = list(string)
+    private_subnets = list(object({
+      name                          = string
+      primary_availabilty_zone      = optional(string)
+      primary_availabilty_zone_id   = optional(string)
+      primary_cidr_block            = string
+      secondary_availabilty_zone    = optional(string)
+      secondary_availabilty_zone_id = optional(string)
+      secondary_cidr_block          = optional(string)
+      tertiary_availabilty_zone     = optional(string)
+      tertiary_availabilty_zone_id  = optional(string)
+      tertiary_cidr_block           = optional(string)
+    }))
+    public_subnets = list(object({
+      name                          = string
+      primary_availabilty_zone      = optional(string)
+      primary_availabilty_zone_id   = optional(string)
+      primary_cidr_block            = optional(string)
+      secondary_availabilty_zone    = optional(string)
+      secondary_availabilty_zone_id = optional(string)
+      secondary_cidr_block          = optional(string)
+      tertiary_availabilty_zone     = optional(string)
+      tertiary_availabilty_zone_id  = optional(string)
+      tertiary_cidr_block           = optional(string)
+    }))
+    nat_gateway = optional(object({
+      name = string
+      type = string
+    }))
   }))
   default = null
 }
-
-variable "public_subnets" {
-  description = "The public subnet variables"
-  type = list(object({
-    public_subnet_name       = string
-    public_subnet_cidr_block = list(string)
-    az                       = list(string)
-  }))
-  default = null
-}
-
-variable "eip" {
-  description = "The public subnet to e associated to the elastic ip"
-  type = list(object({
-    name = list(string)
-  }))
-  default = null
-}
-variable "ngw" {
-  description = "The nat gateway to be associated to the private subnet"
-  type = list(object({
-    name = list(string)
-    # subnet_id     = string
-    # allocation_id = string
-  }))
-  default = null
-}
-
 
 
 
