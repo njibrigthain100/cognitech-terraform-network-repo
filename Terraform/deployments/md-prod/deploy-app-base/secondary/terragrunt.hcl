@@ -16,10 +16,13 @@ include "env" {
 # Locals 
 #-------------------------------------------------------
 locals {
-  region_context   = "secondary"
+  region_context   = "primary"
   deploy_globally  = "true"
-  region           = local.region_context == "primary" ? include.cloud.locals.region.primary : include.cloud.locals.region.secondary
+  internal         = "private"
+  external         = "public"
+  region           = local.region_context == "primary" ? include.cloud.locals.regions.use1.name : include.cloud.locals.regions.usw2.name
   region_prefix    = local.region_context == "primary" ? include.cloud.locals.region_prefix.primary : include.cloud.locals.region_prefix.secondary
+  region_blk       = local.region_context == "primary" ? include.cloud.locals.regions.use1 : include.cloud.locals.regions.usw2
   deployment_name  = "terraform-${include.env.locals.name_abr}-deploy-app-base-${local.region_context}"
   cidr_blocks      = local.region_context == "primary" ? include.cloud.locals.cidr_block_use1 : include.cloud.locals.cidr_block_usw2
   state_bucket     = local.region_context == "primary" ? include.env.locals.remote_state_bucket.primary : include.env.locals.remote_state_bucket.secondary
@@ -34,7 +37,12 @@ locals {
   )
 }
 
-
+#-------------------------------------------------------
+# Source  
+#-------------------------------------------------------
+terraform {
+  source = "../../../..//formations/Initiate-account"
+}
 
 #-------------------------------------------------------
 # Inputs 
@@ -47,56 +55,66 @@ inputs = {
     tags          = local.tags
   }
 
-  vpc = {
-    name       = include.env.locals.environment
-    cidr_block = local.cidr_blocks[include.env.locals.name_abr].segments.sit.vpc
-  }
+  vpc = [
+    {
+      name       = include.env.locals.environment
+      cidr_block = local.cidr_blocks[include.env.locals.name_abr].segments.sit.vpc
+      private_subnets = [
+        {
+          name                       = "pvt1"
+          primary_availabilty_zone   = include.cloud.locals.region_blk.availability_zones.primary
+          primary_cidr_block         = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.internal][local.region_context][0]
+          secondary_availabilty_zone = include.cloud.locals.region_blk.availability_zones.secondary
+          secondary_cidr_block       = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.internal][local.region_context][1]
+        }
+      ]
+      public_subnets = [
+        {
+          name                       = "pvt1"
+          primary_availabilty_zone   = include.cloud.locals.region_blk.availability_zones.primary
+          primary_cidr_block         = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.internal][local.region_context][0]
+          secondary_availabilty_zone = include.cloud.locals.region_blk.availability_zones.secondary
+          secondary_cidr_block       = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.internal][local.region_context][1]
+        }
+      ]
+      nat_gateway = [
+        {
+          name = "nat1"
+          type = local.external
+        }
+      ]
+    }
+  ]
 }
-
 
 #-------------------------------------------------------
 # State Configuration
 #-------------------------------------------------------
 remote_state {
-  backend = "s3"
+  backend = " s3 "
   generate = {
-    path      = "backend.tf"
-    if_exists = "overwrite"
+    path      = " backend.tf "
+    if_exists = " overwrite "
   }
   config = {
     bucket               = local.state_bucket
-    bucket_sse_algorithm = "AES256"
+    bucket_sse_algorithm = " AES256 "
     dynamodb_table       = local.state_lock_table
     encrypt              = true
-    key                  = "${local.deployment_name}/terraform.tfstate"
+    key                  = " $ { local.deployment_name } / terraform.tfstate "
     region               = local.region
   }
 }
 
-
-
-
-
-
-
 #-------------------------------------------------------
 # Providers 
 #-------------------------------------------------------
-generate "aws-providers" {
-  path      = "aws-provider.tf"
-  if_exists = "overwrite"
+generate " aws-providers " {
+  path      = " aws-provider.tf "
+  if_exists = " overwrite "
   contents  = <<-EOF
-  provider "aws" {
-    region = "${local.region}"
+  provider " aws " {
+    region = " $ { local.region } "
   }
   EOF
-}
-
-
-
-#-------------------------------------------------------
-# Source  
-#-------------------------------------------------------
-terraform {
-  source = "../../../..//formations/Initiate-account"
 }

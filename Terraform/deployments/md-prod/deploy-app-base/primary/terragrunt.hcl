@@ -20,7 +20,7 @@ locals {
   deploy_globally  = "true"
   internal         = "private"
   external         = "public"
-  region           = local.region_context == "primary" ? include.cloud.locals.region.primary : include.cloud.locals.region.secondary
+  region           = local.region_context == "primary" ? include.cloud.locals.regions.use1.name : include.cloud.locals.regions.usw2.name
   region_prefix    = local.region_context == "primary" ? include.cloud.locals.region_prefix.primary : include.cloud.locals.region_prefix.secondary
   region_blk       = local.region_context == "primary" ? include.cloud.locals.regions.use1 : include.cloud.locals.regions.usw2
   deployment_name  = "terraform-${include.env.locals.name_abr}-deploy-app-base-${local.region_context}"
@@ -59,31 +59,31 @@ inputs = {
     {
       name       = include.env.locals.environment
       cidr_block = local.cidr_blocks[include.env.locals.name_abr].segments.sit.vpc
+      private_subnets = [
+        {
+          name                       = "pvt1"
+          primary_availabilty_zone   = local.region_blk.availability_zones.primary
+          primary_cidr_block         = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.internal][local.region_context][0]
+          secondary_availabilty_zone = local.region_blk.availability_zones.secondary
+          secondary_cidr_block       = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.internal][local.region_context][1]
+        }
+      ]
+      public_subnets = [
+        {
+          name                       = "pvt1"
+          primary_availabilty_zone   = local.region_blk.availability_zones.primary
+          primary_cidr_block         = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.internal][local.region_context][0]
+          secondary_availabilty_zone = local.region_blk.availability_zones.secondary
+          secondary_cidr_block       = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.internal][local.region_context][1]
+        }
+      ]
+      nat_gateway = [
+        {
+          name = "nat1"
+          type = local.external
+        }
+      ]
     }
-    private_subnets = [
-      {
-        name                       = "pvt1 "
-        primary_availabilty_zone   = include.cloud.locals.availability_zones.primary
-        primary_cidr_block         = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.internal][local.region_context][0]
-        secondary_availabilty_zone = include.cloud.locals.availability_zones.secondary
-        secondary_cidr_block       = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.internal][local.region_context][1]
-      }
-    ]
-    public_subnets = [
-      {
-        name                       = "pvt1 "
-        primary_availabilty_zone   = include.cloud.locals.availability_zones.primary
-        primary_cidr_block         = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.internal][local.region_context][0]
-        secondary_availabilty_zone = include.cloud.locals.availability_zones.secondary
-        secondary_cidr_block       = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.internal][local.region_context][1]
-      }
-    ]
-    nat_gateway = [
-      {
-        name = "nat1"
-        type = local.external
-      }
-    ]
   ]
 }
 
@@ -111,7 +111,7 @@ remote_state {
 #-------------------------------------------------------
 generate " aws-providers " {
   path      = " aws-provider.tf "
-  if_exists = " overwrite "
+  if_exists = "overwrite"
   contents  = <<-EOF
   provider " aws " {
     region = " $ { local.region } "
