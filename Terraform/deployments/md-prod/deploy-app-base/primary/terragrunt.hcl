@@ -41,7 +41,7 @@ locals {
 # Source  
 #-------------------------------------------------------
 terraform {
-  source = "../../../..//formations/Initiate-account"
+  source = "../../../..//formations/customer-products"
 }
 
 #-------------------------------------------------------
@@ -55,7 +55,7 @@ inputs = {
     tags          = local.tags
   }
 
-  vpc = [
+  vpcs = [
     {
       name       = include.env.locals.environment
       cidr_block = local.cidr_blocks[include.env.locals.name_abr].segments.sit.vpc
@@ -63,18 +63,18 @@ inputs = {
         {
           name                       = "pvt1"
           primary_availabilty_zone   = local.region_blk.availability_zones.primary
-          primary_cidr_block         = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.internal][local.region_context][0]
+          primary_cidr_block         = local.cidr_blocks[include.env.locals.name_abr].segments.sit.private_subnets.primary
           secondary_availabilty_zone = local.region_blk.availability_zones.secondary
-          secondary_cidr_block       = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.internal][local.region_context][1]
+          secondary_cidr_block       = local.cidr_blocks[include.env.locals.name_abr].segments.sit.private_subnets.secondary
         }
       ]
       public_subnets = [
         {
           name                       = "pvt1"
           primary_availabilty_zone   = local.region_blk.availability_zones.primary
-          primary_cidr_block         = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.internal][local.region_context][0]
+          primary_cidr_block         = local.cidr_blocks[include.env.locals.name_abr].segments.sit.public_subnets.primary
           secondary_availabilty_zone = local.region_blk.availability_zones.secondary
-          secondary_cidr_block       = local.cidr_blocks[include.env.locals.name_abr].segments.sit.subnets[local.internal][local.region_context][1]
+          secondary_cidr_block       = local.cidr_blocks[include.env.locals.name_abr].segments.sit.public_subnets.secondary
         }
       ]
       nat_gateway = [
@@ -91,17 +91,17 @@ inputs = {
 # State Configuration
 #-------------------------------------------------------
 remote_state {
-  backend = " s3 "
+  backend = "s3"
   generate = {
-    path      = " backend.tf "
-    if_exists = " overwrite "
+    path      = "backend.tf"
+    if_exists = "overwrite"
   }
   config = {
     bucket               = local.state_bucket
-    bucket_sse_algorithm = " AES256 "
+    bucket_sse_algorithm = "AES256"
     dynamodb_table       = local.state_lock_table
     encrypt              = true
-    key                  = " $ { local.deployment_name } / terraform.tfstate "
+    key                  = "${local.deployment_name}/terraform.tfstate"
     region               = local.region
   }
 }
@@ -109,12 +109,12 @@ remote_state {
 #-------------------------------------------------------
 # Providers 
 #-------------------------------------------------------
-generate " aws-providers " {
-  path      = " aws-provider.tf "
+generate "aws-providers" {
+  path      = "aws-provider.tf"
   if_exists = "overwrite"
   contents  = <<-EOF
-  provider " aws " {
-    region = " $ { local.region } "
+  provider "aws" {
+    region = "${local.region}"
   }
   EOF
 }

@@ -11,7 +11,7 @@ variable "common" {
 }
 variable "vpc" {
   description = "All VPC resources to be created"
-  type = list(object({
+  type = object({
     name       = string
     cidr_block = string
     private_subnets = list(object({
@@ -42,7 +42,7 @@ variable "vpc" {
       name = string
       type = string
     }))
-  }))
+  })
   default = null
 }
 
