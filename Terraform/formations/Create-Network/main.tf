@@ -28,21 +28,11 @@ resource "aws_internet_gateway" "main_igw" {
   )
 }
 
-# #--------------------------------------------------------------------
-# # VPC - Creates a VPC  to the target account
-# #--------------------------------------------------------------------
-# module "account_vpc" {
-#   source   = "git@github.com:njibrigthain100/Cognitech-terraform-iac-modules.git//terraform/modules/vpc?ref=v1.11"
-#   for_each = { for idx in var.vpc : idx.name => idx }
-#   vpc      = each.value
-#   common   = var.common
-# }
-
 #--------------------------------------------------------------------
 # Subnets - Creates private subnets
 #--------------------------------------------------------------------
 module "private_subnets" {
-  source          = "git@github.com:njibrigthain100/Cognitech-terraform-iac-modules.git//terraform/modules/subnets/private_subnets?ref=v1.12"
+  source          = "git@github.com:njibrigthain100/Cognitech-terraform-iac-modules.git//terraform/modules/subnets/private_subnets?ref=v1.18"
   for_each        = { for private_subnet in var.vpc.private_subnets : private_subnet.name => private_subnet }
   vpc_id          = aws_vpc.main.id
   private_subnets = each.value
@@ -53,10 +43,10 @@ module "private_subnets" {
 # Subnets - Creates public subnets
 #--------------------------------------------------------------------
 module "public_subnets" {
-  source         = "git@github.com:njibrigthain100/Cognitech-terraform-iac-modules.git//terraform/modules/subnets/public_subnets?ref=v1.12"
-  for_each       = { for public_subnet in var.vpc.public_subnets : public_subnet.name => public_subnet }
+  source = "git@github.com:njibrigthain100/Cognitech-terraform-iac-modules.git//terraform/modules/subnets/public_subnets?ref=v1.18"
+  # for_each       = { for public_subnet in var.vpc.public_subnets : public_subnet.name => public_subnet }
   vpc_id         = aws_vpc.main.id
-  public_subnets = each.value
+  public_subnets = var.vpc.public_subnets
   common         = var.common
 }
 
@@ -65,7 +55,7 @@ module "public_subnets" {
 #--------------------------------------------------------------------
 
 module "ngw" {
-  source = "git@github.com:njibrigthain100/Cognitech-terraform-iac-modules.git//terraform/modules/natgateway?ref=v1.12"
+  source = "git@github.com:njibrigthain100/Cognitech-terraform-iac-modules.git//terraform/modules/natgateway?ref=v1.18"
   bypass = (var.vpc.nat_gateway == null)
   common = var.common
   nat_gateway = {

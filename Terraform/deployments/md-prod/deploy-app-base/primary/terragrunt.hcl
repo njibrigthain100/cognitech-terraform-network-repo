@@ -53,6 +53,7 @@ inputs = {
     account_name  = include.cloud.locals.account_name.Kah.name
     region_prefix = local.region_prefix
     tags          = local.tags
+    region        = local.region
   }
 
   vpcs = [
@@ -68,21 +69,17 @@ inputs = {
           secondary_cidr_block       = local.cidr_blocks[include.env.locals.name_abr].segments.sit.private_subnets.secondary
         }
       ]
-      public_subnets = [
-        {
-          name                       = "pvt1"
-          primary_availabilty_zone   = local.region_blk.availability_zones.primary
-          primary_cidr_block         = local.cidr_blocks[include.env.locals.name_abr].segments.sit.public_subnets.primary
-          secondary_availabilty_zone = local.region_blk.availability_zones.secondary
-          secondary_cidr_block       = local.cidr_blocks[include.env.locals.name_abr].segments.sit.public_subnets.secondary
-        }
-      ]
-      nat_gateway = [
-        {
-          name = "nat1"
-          type = local.external
-        }
-      ]
+      public_subnets = {
+        name                       = "pub1"
+        primary_availabilty_zone   = local.region_blk.availability_zones.primary
+        primary_cidr_block         = local.cidr_blocks[include.env.locals.name_abr].segments.sit.public_subnets.primary
+        secondary_availabilty_zone = local.region_blk.availability_zones.secondary
+        secondary_cidr_block       = local.cidr_blocks[include.env.locals.name_abr].segments.sit.public_subnets.secondary
+      }
+      nat_gateway = {
+        name = "nat1"
+        type = local.external
+      }
     }
   ]
 }

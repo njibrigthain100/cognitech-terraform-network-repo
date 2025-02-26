@@ -46,13 +46,13 @@ output "public_subnets" {
   description = "Output of all public subnets"
   value       = values(module.public_subnets)
 }
-output "public_subnet" {
-  description = "The public subnet resources"
-  value = var.vpc != null ? {
-    for key, item in var.vpc.public_subnets :
-    item.name => module.public_subnets[item.name]
-  } : null
-}
+# output "public_subnet" {
+#   description = "The public subnet resources"
+#   value = var.vpc != null ? {
+#     for key, item in var.vpc.public_subnets :
+#     item.name => module.public_subnets[item.name]
+#   } : null
+# }
 
 output "primary_public_subnet_ids" {
   description = "The public subnet ids"

@@ -26,7 +26,7 @@ variable "vpc" {
       tertiary_availabilty_zone_id  = optional(string)
       tertiary_cidr_block           = optional(string)
     }))
-    public_subnets = list(object({
+    public_subnets = object({
       name                          = string
       primary_availabilty_zone      = optional(string)
       primary_availabilty_zone_id   = optional(string)
@@ -37,7 +37,7 @@ variable "vpc" {
       tertiary_availabilty_zone     = optional(string)
       tertiary_availabilty_zone_id  = optional(string)
       tertiary_cidr_block           = optional(string)
-    }))
+    })
     nat_gateway = optional(object({
       name = string
       type = string
