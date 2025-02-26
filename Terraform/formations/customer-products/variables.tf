@@ -43,7 +43,7 @@ variable "vpcs" {
       type = string
     }))
   }))
-  default = null
+  default = []
 }
 
 

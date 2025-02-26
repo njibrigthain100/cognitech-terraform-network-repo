@@ -1,12 +1,12 @@
 output "vpc_id" {
   description = "The id of the vpc created"
-  value       = module.account_vpc.vpc_id
+  value       = aws_vpc.main.id
 }
 
 
 output "igw_id" {
   description = "The internet gateway id"
-  value       = module.account_vpc.igw_id
+  value       = aws_internet_gateway.main_igw.id
 }
 #-------------------------------------------------------
 # Private subnet outputs
@@ -18,9 +18,25 @@ output "private_subnets" {
 output "private_subnet" {
   description = "The private subnet resources"
   value = var.vpc != null ? {
-    for key, item in var.vpcs.private_subnets :
+    for key, item in var.vpc.private_subnets :
     item.name => module.private_subnets[item.name]
   } : null
+}
+
+output "primary_private_subnet_ids" {
+  description = "The public subnet ids"
+  value       = module.public_subnets.primary_subnet_id
+}
+output "secondary_private_subnet_ids" {
+  description = "The public subnet ids"
+  value       = module.public_subnets.secondary_subnet_id
+
+}
+
+output "tertiary_private_subnet_ids" {
+  description = "The public subnet ids"
+  value       = module.public_subnets.tertiary_subnet_id
+
 }
 
 #-------------------------------------------------------
@@ -36,4 +52,21 @@ output "public_subnet" {
     for key, item in var.vpc.public_subnets :
     item.name => module.public_subnets[item.name]
   } : null
+}
+
+output "primary_public_subnet_ids" {
+  description = "The public subnet ids"
+  value       = module.public_subnets.primary_subnet_id
+
+}
+output "secondary_public_subnet_ids" {
+  description = "The public subnet ids"
+  value       = module.public_subnets.secondary_subnet_id
+
+}
+
+output "tertiary_public_subnet_ids" {
+  description = "The public subnet ids"
+  value       = module.public_subnets.tertiary_subnet_id
+
 }
