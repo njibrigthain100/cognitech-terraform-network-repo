@@ -1,31 +1,10 @@
 #--------------------------------------------------------------------
 # VPC - Creates a VPC  to the target account
 #--------------------------------------------------------------------
-resource "aws_vpc" "main" {
-  cidr_block           = var.vpc.cidr_block
-  enable_dns_hostnames = true
-  enable_dns_support   = true
-  instance_tenancy     = "default"
-
-  tags = merge(var.common.tags,
-    {
-      Name = "${var.common.account_name}-${var.common.region_prefix}-${var.vpc.name}-vpc"
-    }
-  )
-
-}
-
-#--------------------------------------------------------------------
-# VPC - Creates and associates internet gateway to vpc 
-#--------------------------------------------------------------------
-resource "aws_internet_gateway" "main_igw" {
-  vpc_id = aws_vpc.main.id
-
-  tags = merge(var.common.tags,
-    {
-      Name = "${var.common.account_name}-${var.common.region_prefix}-${var.vpc.name}-igw"
-    }
-  )
+module "vpc" {
+  source = "git@github.com:njibrigthain100/Cognitech-terraform-iac-modules.git//terraform/modules/vpc?ref=v1.18"
+  vpc    = var.vpc
+  common = var.common
 }
 
 #--------------------------------------------------------------------
@@ -34,7 +13,7 @@ resource "aws_internet_gateway" "main_igw" {
 module "private_subnets" {
   source          = "git@github.com:njibrigthain100/Cognitech-terraform-iac-modules.git//terraform/modules/subnets/private_subnets?ref=v1.18"
   for_each        = { for private_subnet in var.vpc.private_subnets : private_subnet.name => private_subnet }
-  vpc_id          = aws_vpc.main.id
+  vpc_id          = module.vpc.vpc_id
   private_subnets = each.value
   common          = var.common
 }
@@ -42,10 +21,10 @@ module "private_subnets" {
 #--------------------------------------------------------------------
 # Subnets - Creates public subnets
 #--------------------------------------------------------------------
+
 module "public_subnets" {
-  source = "git@github.com:njibrigthain100/Cognitech-terraform-iac-modules.git//terraform/modules/subnets/public_subnets?ref=v1.18"
-  # for_each       = { for public_subnet in var.vpc.public_subnets : public_subnet.name => public_subnet }
-  vpc_id         = aws_vpc.main.id
+  source         = "git@github.com:njibrigthain100/Cognitech-terraform-iac-modules.git//terraform/modules/subnets/public_subnets?ref=v1.18"
+  vpc_id         = module.vpc.vpc_id
   public_subnets = var.vpc.public_subnets
   common         = var.common
 }
@@ -53,7 +32,6 @@ module "public_subnets" {
 #--------------------------------------------------------------------
 # Natgateway - Creates natgateways
 #--------------------------------------------------------------------
-
 module "ngw" {
   source = "git@github.com:njibrigthain100/Cognitech-terraform-iac-modules.git//terraform/modules/natgateway?ref=v1.18"
   bypass = (var.vpc.nat_gateway == null)
@@ -67,4 +45,9 @@ module "ngw" {
   }
 
 }
+
+
+
+
+
 

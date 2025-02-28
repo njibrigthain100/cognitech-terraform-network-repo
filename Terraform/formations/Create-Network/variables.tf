@@ -39,8 +39,10 @@ variable "vpc" {
       tertiary_cidr_block           = optional(string)
     })
     nat_gateway = optional(object({
-      name = string
-      type = string
+      name             = string
+      type             = string
+      primary_subnet   = optional(string)
+      secondary_subnet = optional(string)
     }))
   })
   default = null

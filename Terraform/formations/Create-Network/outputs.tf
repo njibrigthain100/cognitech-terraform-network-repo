@@ -1,13 +1,15 @@
+#-------------------------------------------------------
+# VPC outputs
+#-------------------------------------------------------
 output "vpc_id" {
   description = "The id of the vpc created"
-  value       = aws_vpc.main.id
+  value       = module.vpc.vpc_id
 }
-
-
 output "igw_id" {
   description = "The internet gateway id"
-  value       = aws_internet_gateway.main_igw.id
+  value       = module.vpc.igw_id
 }
+
 #-------------------------------------------------------
 # Private subnet outputs
 #-------------------------------------------------------
@@ -70,3 +72,6 @@ output "tertiary_public_subnet_ids" {
   value       = module.public_subnets.tertiary_subnet_id
 
 }
+
+
+
