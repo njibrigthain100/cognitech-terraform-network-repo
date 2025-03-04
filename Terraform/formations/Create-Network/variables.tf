@@ -44,15 +44,21 @@ variable "vpc" {
       primary_subnet   = optional(string)
       secondary_subnet = optional(string)
     }))
-    routes = object({
-      public_gateway_id      = string
-      nat_gateway_id         = string
-      destination_cidr_block = string
-      primary_subnet_id      = string
+    private_routes = object({
+      nat_gateway_id         = optional(string)
+      destination_cidr_block = optional(string)
+      primary_subnet_id      = optional(string)
       secondary_subnet_id    = optional(string)
       tertiary_subnet_id     = optional(string)
       has_tertiary_subnet    = optional(bool, false)
-      private_subnets_id     = list(string)
+    })
+    public_routes = object({
+      public_gateway_id      = optional(string)
+      destination_cidr_block = optional(string)
+      primary_subnet_id      = optional(string)
+      secondary_subnet_id    = optional(string)
+      tertiary_subnet_id     = optional(string)
+      has_tertiary_subnet    = optional(bool, false)
     })
   })
   default = null
