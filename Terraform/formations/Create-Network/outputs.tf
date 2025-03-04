@@ -17,27 +17,27 @@ output "private_subnets" {
   description = "Output of all private subnets"
   value       = values(module.private_subnets)
 }
-output "private_subnet" {
-  description = "The private subnet resources"
-  value = var.vpc != null ? {
-    for key, item in var.vpc.private_subnets :
-    item.name => module.private_subnets[item.name]
-  } : null
-}
+# output "private_subnet" {
+#   description = "The private subnet resources"
+#   value = var.vpc != null ? {
+#     for key, item in var.vpc.private_subnets :
+#     item.name => module.private_subnets[item.name]
+#   } : null
+# }
 
 output "primary_private_subnet_ids" {
   description = "The public subnet ids"
-  value       = module.public_subnets.primary_subnet_id
+  value       = module.private_subnets.primary_subnet_id
 }
 output "secondary_private_subnet_ids" {
   description = "The public subnet ids"
-  value       = module.public_subnets.secondary_subnet_id
+  value       = module.private_subnets.secondary_subnet_id
 
 }
 
 output "tertiary_private_subnet_ids" {
   description = "The public subnet ids"
-  value       = module.public_subnets.tertiary_subnet_id
+  value       = module.private_subnets.tertiary_subnet_id
 
 }
 

@@ -60,17 +60,15 @@ inputs = {
     {
       name       = include.env.locals.environment
       cidr_block = local.cidr_blocks[include.env.locals.name_abr].segments.sit.vpc
-      private_subnets = [
-        {
-          name                       = "pvt1"
-          primary_availabilty_zone   = local.region_blk.availability_zones.primary
-          primary_cidr_block         = local.cidr_blocks[include.env.locals.name_abr].segments.sit.private_subnets.primary
-          secondary_availabilty_zone = local.region_blk.availability_zones.secondary
-          secondary_cidr_block       = local.cidr_blocks[include.env.locals.name_abr].segments.sit.private_subnets.secondary
-        }
-      ]
+      private_subnets = {
+        name                       = "pvt"
+        primary_availabilty_zone   = local.region_blk.availability_zones.primary
+        primary_cidr_block         = local.cidr_blocks[include.env.locals.name_abr].segments.sit.private_subnets.primary
+        secondary_availabilty_zone = local.region_blk.availability_zones.secondary
+        secondary_cidr_block       = local.cidr_blocks[include.env.locals.name_abr].segments.sit.private_subnets.secondary
+      }
       public_subnets = {
-        name                       = "pub1"
+        name                       = "pub"
         primary_availabilty_zone   = local.region_blk.availability_zones.primary
         primary_cidr_block         = local.cidr_blocks[include.env.locals.name_abr].segments.sit.public_subnets.primary
         secondary_availabilty_zone = local.region_blk.availability_zones.secondary

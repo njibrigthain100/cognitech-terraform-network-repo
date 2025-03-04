@@ -14,7 +14,7 @@ variable "vpc" {
   type = object({
     name       = string
     cidr_block = string
-    private_subnets = list(object({
+    private_subnets = object({
       name                          = string
       primary_availabilty_zone      = optional(string)
       primary_availabilty_zone_id   = optional(string)
@@ -25,7 +25,7 @@ variable "vpc" {
       tertiary_availabilty_zone     = optional(string)
       tertiary_availabilty_zone_id  = optional(string)
       tertiary_cidr_block           = optional(string)
-    }))
+    })
     public_subnets = object({
       name                          = string
       primary_availabilty_zone      = optional(string)
@@ -47,8 +47,8 @@ variable "vpc" {
     private_routes = object({
       nat_gateway_id         = optional(string)
       destination_cidr_block = optional(string)
-      primary_subnet_id      = optional(string)
-      secondary_subnet_id    = optional(string)
+      primary_subnet_id      = string
+      secondary_subnet_id    = string
       tertiary_subnet_id     = optional(string)
       has_tertiary_subnet    = optional(bool, false)
     })
