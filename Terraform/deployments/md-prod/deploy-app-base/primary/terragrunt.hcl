@@ -80,10 +80,10 @@ inputs = {
         name = "nat1"
         type = local.external
       }
-      private_route = {
+      private_routes = {
         destination_cidr_block = "0.0.0.0/0"
       }
-      public_route = {
+      public_routes = {
         destination_cidr_block = "0.0.0.0/0"
       }
     }
