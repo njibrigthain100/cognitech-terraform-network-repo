@@ -1,93 +1,79 @@
-# This workflow installs the latest version of Terraform CLI and configures the Terraform CLI configuration file
-# with an API token for Terraform Cloud (app.terraform.io). On pull request events, this workflow will run
-# `terraform init`, `terraform fmt`, and `terraform plan` (speculative plan via Terraform Cloud). On push events
-# to the "main" branch, `terraform apply` will be executed.
-#
-# Documentation for `hashicorp/setup-terraform` is located here: https://github.com/hashicorp/setup-terraform
-#
-# To use this workflow, you will need to complete the following setup steps.
-#
-# 1. Create a `main.tf` file in the root of this repository with the `remote` backend and one or more resources defined.
-#   Example `main.tf`:
-#     # The configuration for the `remote` backend.
-#     terraform {
-#       backend "remote" {
-#         # The name of your Terraform Cloud organization.
-#         organization = "example-organization"
-#
-#         # The name of the Terraform Cloud workspace to store Terraform state files in.
-#         workspaces {
-#           name = "example-workspace"
-#         }
-#       }
-#     }
-#
-#     # An example resource that does nothing.
-#     resource "null_resource" "example" {
-#       triggers = {
-#         value = "A example resource that does nothing!"
-#       }
-#     }
-#
-#
-# 2. Generate a Terraform Cloud user API token and store it as a GitHub secret (e.g. TF_API_TOKEN) on this repository.
-#   Documentation:
-#     - https://www.terraform.io/docs/cloud/users-teams-organizations/api-tokens.html
-#     - https://help.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets
-#
-# 3. Reference the GitHub secret in step using the `hashicorp/setup-terraform` GitHub Action.
-#   Example:
-#     - name: Setup Terraform
-#       uses: hashicorp/setup-terraform@v1
-#       with:
-#         cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-
-name: 'Terraform'
-
+name: deploy-shared-service-resources
 on:
+  workflow_dispatch:
+    inputs:
+      terragrunt_action:
+        description: "select the terragrunt action to perform"
+        required: true
+        type: choice
+        options:
+          - "plan"
+          - "apply"
+      skip_nochange:
+        description: "Apply even if no change is reported in the plan"
+        required: false
+        type: boolean
+
   push:
-    branches: [ "main" ]
-  pull_request:
+    paths:
+      - "Terraform/deployments/md-prod/deploy-app-base/primary/**/*"
+      - ".github/workflows/deploy-shared-service.yaml"
+
+env:
+  IAM_ROLE: arn:aws:iam::485147667400:role/prod-OIDCGitHubRole-role
+  REGION: us-east-1
+  DEPLOYMENT_PATH: Terraform/deployments/md-prod/deploy-app-base/primary
 
 permissions:
+  packages: write
   contents: read
-
+  id-token: write
 jobs:
-  terraform:
-    name: 'Terraform'
+  deploy-shared-service:
     runs-on: ubuntu-latest
-    environment: production
-
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-latest]
     defaults:
       run:
         shell: bash
-
+        working-directory: ${{ env.DEPLOYMENT_PATH }}
     steps:
-    # Checkout the repository to the GitHub Actions runner
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Clone the repository
+        uses: actions/checkout@v4
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1.7.0
+        with:
+          role-to-assume: ${{ env.IAM_ROLE }}
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ env.REGION }}
+        # Install the latest version of Terragrunt CLI and configure the Terragrunt CLI configuration file with a Terragrunt Cloud user API token
+      - name: Setup Terraform v1.11.1
+        uses: hashicorp/setup-Terraform@v1
+        with:
+          terraform_version: 1.11.1
+          terraform_wrapper: false
+      - name: Setup Terraform version
+        run: terraform --version
+      - name: Setup Terraform wrapper path
+        run: which terraform
 
-    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+      - name: Setup Terragrunt v0.75.0
+        run: |
+          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v0.75.0/terragrunt_linux_amd64"
+          sudo chmod +x /bin/terragrunt
+      # Initialize a new or existing Terragrunt working directory by creating initial files, loading any remote state, downloading modules, etc.
+      - name: Terragrunt Init
+        id: init
+        run: terragrunt init
+      # Generates an execution plan for Terragrunt
+      - name: Terragrunt Plan
+        id: plan
+        run: terragrunt run-all plan --terragrunt-non-interactive
 
-    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
-    - name: Terraform Init
-      run: terraform init
-
-    # Checks that all Terraform configuration files adhere to a canonical format
-    - name: Terraform Format
-      run: terraform fmt -check
-
-    # Generates an execution plan for Terraform
-    - name: Terraform Plan
-      run: terraform plan -input=false
-
-      # On push to "main", build or change infrastructure according to Terraform configuration files
-      # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
-    - name: Terraform Apply
-      if: github.ref == 'refs/heads/"main"' && github.event_name == 'push'
-      run: terraform apply -auto-approve -input=false
+        # On push to main, build or change infrastructure according to Terragrunt configuration files
+        # Note: It is recommended to set up a required "strict" status check in your repository for "Terragrunt Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
+      - name: Terragrunt Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terragrunt run-all apply --terragrunt-non-interactive
