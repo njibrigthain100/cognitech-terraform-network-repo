@@ -1,47 +1,44 @@
 name: deploy-shared-service-resources
 on:
   workflow_dispatch:
-  inputs:
-    terragrunt_action:
-      description: 'select the terragrunt action to perform'
-      required: true
-      type: choice 
-      options:
-        - 'plan'
-        - 'apply'
-    skip_nochange:
-      description: 'Apply even if no change is reported in the plan'
-      required: false
-      type: boolean
+    inputs:
+      terragrunt_action:
+        description: "select the terragrunt action to perform"
+        required: true
+        type: choice
+        options:
+          - "plan"
+          - "apply"
+      skip_nochange:
+        description: "Apply even if no change is reported in the plan"
+        required: false
+        type: boolean
 
   push:
     paths:
-      - 'Terraform/deployments/md-prod/deploy-app-base/primary/**'
-      - '.github/workflows/deploy-shared-service.yaml'
+      - "Terraform/deployments/md-prod/deploy-app-base/primary/**"
+      - ".github/workflows/deploy-shared-service.yaml"
 
 env:
   IAM_ROLE: arn:aws:iam::485147667400:role/prod-OIDCGitHubRole-role
-  REGION: us-east-1 
+  REGION: us-east-1
   DEPLOYMENT_PATH: Terraform/deployments/md-prod/deploy-app-base/primary
 
 permissions:
-  packages: write 
-  contents: read 
-  id-token: write 
+  packages: write
+  contents: read
+  id-token: write
 jobs:
   deploy-shared-service:
     runs-on: ubuntu-latest
-    if: ${{ inputs.terragrunt_action == 'apply' || inputs.terraform_action == 'plan' || github.ref_type == 'branch' }}
     strategy:
-      fail-fast: false 
+      fail-fast: false
       matrix:
         runner: [ubuntu-latest]
     defaults:
-        run:
-          shell: bash
-          working-directory: ${{ env.DEPLOYMENT_PATH }}
-    outputs:
-        nochanges: ${{ steps.terragrunt.outputs.no_changes }}
+      run:
+        shell: bash
+        working-directory: ${{ env.DEPLOYMENT_PATH }}
     steps:
       - name: Clone the repository
         uses: actions/checkout@v4
@@ -50,7 +47,7 @@ jobs:
         with:
           role-to-assume: ${{ env.IAM_ROLE }}
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ env.REGION }}
         # Install the latest version of Terragrunt CLI and configure the Terragrunt CLI configuration file with a Terragrunt Cloud user API token
       - name: Setup Terraform v1.11.1
         uses: hashicorp/setup-Terraform@v1
@@ -69,7 +66,7 @@ jobs:
       # Initialize a new or existing Terragrunt working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terragrunt Init
         id: init
-        run: terragrunt init 
+        run: terragrunt init
       # Generates an execution plan for Terragrunt
       - name: Terragrunt Plan
         id: plan
