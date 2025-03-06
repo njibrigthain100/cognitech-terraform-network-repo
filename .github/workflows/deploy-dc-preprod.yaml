@@ -1,5 +1,4 @@
 name: deploy-simple-Network
-
 on:
   push:
     branches:
@@ -7,7 +6,7 @@ on:
       - "*"
     paths:
       - "Terraform/deployments/dc-prod/deploy-app-base/primary/**/*"
-      - ".github/workflows/deploy-simple-Network.yaml"
+      - ".github/workflows/deploy-dc-preprod.yaml"
   workflow_dispatch:
     inputs:
       terragrunt_action:
