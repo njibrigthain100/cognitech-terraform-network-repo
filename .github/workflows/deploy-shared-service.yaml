@@ -16,7 +16,7 @@ on:
 
   push:
     paths:
-      - "Terraform/deployments/md-prod/deploy-app-base/primary/**"
+      - "Terraform/deployments/md-prod/deploy-app-base/primary/**/*"
       - ".github/workflows/deploy-shared-service.yaml"
 
 env:
