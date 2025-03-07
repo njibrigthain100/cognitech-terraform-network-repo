@@ -1,21 +1,15 @@
-name: Deploy-Simple-Network
+name: deploy-simple-Network
 
 on:
   push:
-    branches:
-      - main # Run on push to the main branch
-      - "feature/*" # Run on push to any feature branch
-    paths:
-      - "Terraform/deployments/dc-prod/deploy-app-base/primary/**/*"
-  pull_request:
-    branches:
-      - main # Run on pull request merge into main
+    branches-ignore:
+      - main # Ignores all pushes from the main branch
     paths:
       - "Terraform/deployments/dc-prod/deploy-app-base/primary/**/*"
   workflow_dispatch:
     inputs:
       terragrunt_action:
-        description: "Select the terragrunt action to perform"
+        description: "select the terragrunt action to perform"
         required: true
         type: choice
         options:
@@ -97,36 +91,12 @@ jobs:
     needs: approve
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.terragrunt_action == 'apply' && github.ref == 'refs/heads/main'
-    defaults:
-      run:
-        shell: bash
     steps:
-      - name: Clone the repository
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1.7.0
-        with:
-          role-to-assume: ${{ env.IAM_ROLE }}
-          role-session-name: GitHub_to_AWS_via_FederatedOIDC
-          aws-region: ${{ env.REGION }}
-
-      - name: Setup Terraform v1.11.1
-        uses: hashicorp/setup-Terraform@v1
-        with:
-          terraform_version: 1.11.1
-          terraform_wrapper: false
-
-      - name: Setup Terraform version
-        run: terraform --version
-
-      - name: Setup Terraform wrapper path
-        run: which terraform
-
-      - name: Setup Terragrunt v0.75.0
-        run: |
-          sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v0.75.0/terragrunt_linux_amd64"
-          sudo chmod +x /bin/terragrunt
-
       - name: Terragrunt Apply
         run: terragrunt run-all apply --terragrunt-non-interactive
+
+      - name: Debug output
+        run: |
+          echo "Event Name: ${{ github.event_name }}"
+          echo "Terragrunt Action: ${{ github.event.inputs.terragrunt_action }}"
+          echo "Branch: ${{ github.ref }}"
