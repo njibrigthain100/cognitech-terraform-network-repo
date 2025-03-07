@@ -3,8 +3,8 @@ on:
   push:
     branches-ignore: # Ignores all pushes from the main branch
       - main
-    branches:
-      - "*"
+    # branches:
+    #   - "*"
     paths:
       - "Terraform/deployments/dc-prod/deploy-app-base/primary/**/*"
       # - ".github/workflows/deploy-dc-preprod.yaml"
