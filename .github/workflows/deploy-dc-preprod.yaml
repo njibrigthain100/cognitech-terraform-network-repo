@@ -6,7 +6,7 @@ on:
       - main # Ignores all pushes from the main branch
     paths:
       - "Terraform/deployments/dc-prod/deploy-app-base/primary/**/*"
-      - ".github/workflows/deploy-dc-preprod.yaml"
+      # - ".github/workflows/deploy-dc-preprod.yaml"
   workflow_dispatch:
     inputs:
       terragrunt_action:
@@ -91,13 +91,7 @@ jobs:
   apply:
     needs: approve
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.terragrunt_action == 'apply' && github.ref == 'refs/heads/main'
     steps:
       - name: Terragrunt Apply
         run: terragrunt run-all apply --terragrunt-non-interactive
-
-      - name: Debug output
-        run: |
-          echo "Event Name: ${{ github.event_name }}"
-          echo "Terragrunt Action: ${{ github.event.inputs.terragrunt_action }}"
-          echo "Branch: ${{ github.ref }}"
