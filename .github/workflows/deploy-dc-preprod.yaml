@@ -1,13 +1,11 @@
 name: deploy-simple-Network
+
 on:
   push:
-    branches-ignore: # Ignores all pushes from the main branch
-      - main
-    # branches:
-    #   - "*"
+    branches-ignore:
+      - main # Ignores all pushes from the main branch
     paths:
       - "Terraform/deployments/dc-prod/deploy-app-base/primary/**/*"
-      # - ".github/workflows/deploy-dc-preprod.yaml"
   workflow_dispatch:
     inputs:
       terragrunt_action:
@@ -47,7 +45,7 @@ jobs:
       - name: Clone the repository
         uses: actions/checkout@v4
 
-      - name: configure aws credentials
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1.7.0
         with:
           role-to-assume: ${{ env.IAM_ROLE }}
@@ -82,7 +80,7 @@ jobs:
   approve:
     needs: plan
     runs-on: ubuntu-latest
-    if: github.event.inputs.terragrunt_action == 'apply' || github.event_name == 'push'
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.terragrunt_action == 'apply' && github.ref == 'refs/heads/main'
     environment:
       name: production
     steps:
@@ -92,7 +90,7 @@ jobs:
   apply:
     needs: approve
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && github.event.inputs.terragrunt_action == 'apply'
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.terragrunt_action == 'apply' && github.ref == 'refs/heads/main'
     steps:
       - name: Terragrunt Apply
         run: terragrunt run-all apply --terragrunt-non-interactive
