@@ -32,7 +32,7 @@ permissions:
   id-token: write
 
 jobs:
-  deploy-shared-service:
+  plan:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -78,6 +78,20 @@ jobs:
         id: plan
         run: terragrunt run-all plan --terragrunt-non-interactive
 
+  approve:
+    needs: plan
+    runs-on: ubuntu-latest
+    if: github.event.inputs.terragrunt_action == 'apply' || github.event_name == 'push'
+    environment:
+      name: production
+    steps:
+      - name: Awaiting approval before applying changes
+        run: echo "Waiting for manual approval to apply changes."
+
+  apply:
+    needs: approve
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && github.event.inputs.terragrunt_action == 'apply'
+    steps:
       - name: Terragrunt Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terragrunt run-all apply --terragrunt-non-interactive
