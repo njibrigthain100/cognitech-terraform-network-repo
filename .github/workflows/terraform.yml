@@ -1,5 +1,11 @@
-name: deploy-shared-service-resources
+name: deploy-simple-Network
+
 on:
+  push:
+    branches-ignore:
+      - main # Ignores all pushes from the main branch
+    paths:
+      - "Terraform/deployments/dc-prod/deploy-app-base/primary/**/*"
   workflow_dispatch:
     inputs:
       terragrunt_action:
@@ -14,22 +20,18 @@ on:
         required: false
         type: boolean
 
-  push:
-    paths:
-      - "Terraform/deployments/md-prod/deploy-app-base/primary/**/*"
-      - ".github/workflows/deploy-shared-service.yaml"
-
 env:
   IAM_ROLE: arn:aws:iam::485147667400:role/prod-OIDCGitHubRole-role
   REGION: us-east-1
-  DEPLOYMENT_PATH: Terraform/deployments/md-prod/deploy-app-base/primary
+  DEPLOYMENT_PATH: Terraform/deployments/dc-prod/deploy-app-base/primary
 
 permissions:
   packages: write
   contents: read
   id-token: write
+
 jobs:
-  deploy-shared-service:
+  plan:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -42,20 +44,23 @@ jobs:
     steps:
       - name: Clone the repository
         uses: actions/checkout@v4
-      - name: configure aws credentials
+
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1.7.0
         with:
           role-to-assume: ${{ env.IAM_ROLE }}
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ env.REGION }}
-        # Install the latest version of Terragrunt CLI and configure the Terragrunt CLI configuration file with a Terragrunt Cloud user API token
+
       - name: Setup Terraform v1.11.1
         uses: hashicorp/setup-Terraform@v1
         with:
           terraform_version: 1.11.1
           terraform_wrapper: false
+
       - name: Setup Terraform version
         run: terraform --version
+
       - name: Setup Terraform wrapper path
         run: which terraform
 
@@ -63,17 +68,35 @@ jobs:
         run: |
           sudo wget -q -O /bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v0.75.0/terragrunt_linux_amd64"
           sudo chmod +x /bin/terragrunt
-      # Initialize a new or existing Terragrunt working directory by creating initial files, loading any remote state, downloading modules, etc.
+
       - name: Terragrunt Init
         id: init
         run: terragrunt init
-      # Generates an execution plan for Terragrunt
+
       - name: Terragrunt Plan
         id: plan
         run: terragrunt run-all plan --terragrunt-non-interactive
 
-        # On push to main, build or change infrastructure according to Terragrunt configuration files
-        # Note: It is recommended to set up a required "strict" status check in your repository for "Terragrunt Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
+  approve:
+    needs: plan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.terragrunt_action == 'apply' && github.ref == 'refs/heads/main'
+    environment:
+      name: production
+    steps:
+      - name: Awaiting approval before applying changes
+        run: echo "Waiting for manual approval to apply changes."
+
+  apply:
+    needs: approve
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.terragrunt_action == 'apply' && github.ref == 'refs/heads/main'
+    steps:
       - name: Terragrunt Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terragrunt run-all apply --terragrunt-non-interactive
+
+      - name: Debug output
+        run: |
+          echo "Event Name: ${{ github.event_name }}"
+          echo "Terragrunt Action: ${{ github.event.inputs.terragrunt_action }}"
+          echo "Branch: ${{ github.ref }}"
