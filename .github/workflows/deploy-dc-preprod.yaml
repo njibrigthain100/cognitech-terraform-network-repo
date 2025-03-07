@@ -1,4 +1,4 @@
-name: deploy-simple-Network
+name: Deploy-Simple-Network
 
 on:
   push:
