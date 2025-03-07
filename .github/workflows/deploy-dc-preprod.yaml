@@ -2,15 +2,20 @@ name: Deploy-Simple-Network
 
 on:
   push:
-    branches-ignore:
-      - main # Ignores all pushes from the main branch
+    branches:
+      - main # Run on push to the main branch
+      - "*" # Run on push to any feature branch
     paths:
       - "Terraform/deployments/dc-prod/deploy-app-base/primary/**/*"
-      # - ".github/workflows/deploy-dc-preprod.yaml"
+  pull_request:
+    branches:
+      - main # Run on pull request merge into main
+    paths:
+      - "Terraform/deployments/dc-prod/deploy-app-base/primary/**/*"
   workflow_dispatch:
     inputs:
       terragrunt_action:
-        description: "select the terragrunt action to perform"
+        description: "Select the terragrunt action to perform"
         required: true
         type: choice
         options:
