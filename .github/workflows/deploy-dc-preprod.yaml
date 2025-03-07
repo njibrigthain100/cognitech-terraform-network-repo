@@ -129,4 +129,5 @@ jobs:
           sudo chmod +x /bin/terragrunt
 
       - name: Terragrunt Apply
+        working-directory: ${{ env.DEPLOYMENT_PATH }}
         run: terragrunt run-all apply --terragrunt-non-interactive
