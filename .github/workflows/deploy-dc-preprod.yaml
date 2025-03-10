@@ -7,12 +7,14 @@ on:
       - "*" # Run on push to any feature branch
     paths:
       - "Terraform/deployments/dc-prod/deploy-app-base/primary/**/*"
+    if: github.event.head_commit.message != 'Merge pull request'
   pull_request:
     types: [closed]
     branches:
       - main # Run on pull request merge into main
     paths:
       - "Terraform/deployments/dc-prod/deploy-app-base/primary/**/*"
+    if: github.event.pull_request.merged == true
   workflow_dispatch:
     inputs:
       terragrunt_action:
@@ -38,7 +40,7 @@ permissions:
   id-token: write
 
 jobs:
-  plan:
+  Plan:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -84,8 +86,8 @@ jobs:
         id: plan
         run: terragrunt run-all plan --terragrunt-non-interactive
 
-  approve:
-    needs: plan
+  Approve:
+    needs: Plan
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.terragrunt_action == 'apply' && github.ref == 'refs/heads/main'
     environment:
@@ -94,8 +96,8 @@ jobs:
       - name: Awaiting approval before applying changes
         run: echo "Waiting for manual approval to apply changes."
 
-  apply:
-    needs: approve
+  Apply:
+    needs: Approve
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.terragrunt_action == 'apply' && github.ref == 'refs/heads/main'
     defaults:
